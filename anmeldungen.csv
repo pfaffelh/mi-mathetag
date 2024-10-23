@@ -1,4 +1,3 @@
-id,Nachname,Vorname,Klassenstufe,Schule,Name der Mathematiklehrkraft,Vormittagskurs Erstwunsch, Vormittagskurs Zweitwunsch,Nachmittagskurs Erstwunsch,Nachmittagskurs Zweitwunsch
-0,Mustermann,Max,10,Faust-Gymnasium,Müller,Workshop 1,Workshop 2,Workshop 4,Workshop 5
-0,Musterfrau,Eva,11,Goethe-Gymnasium,Meyer,Workshop 3,Workshop 1,Workshop 6,Workshop 4
-
+Dateiname;Vorname;Nachname;Mail;Vormittagskurs1;Vormittagskurs2;Nachmittagskurs1;Nachmittagskurs2;Schule;Stufe;Mathematiklehrkraft
+1;Max;Mustermann;muster@mann.de;ws1;ws2;ws4;ws5;Faust-Gymnasium;10;Müller
+2;Eva;Musterfrau;muster@frau.de;ws3;ws1;ws6;ws4;Goethe-Gymnasium;9;Mayer
