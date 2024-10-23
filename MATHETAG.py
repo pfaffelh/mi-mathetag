@@ -85,7 +85,7 @@ if anmeldungen_csv:
 
             # Ein wenig Statistik
             for wunsch in wuensche:
-                st.write(f"{wr["name"]}: {sum(df[f"Einteilung {wr["name"]}"] == wunsch)} Teilnehmer haben ihren Wunsch { wuensche.index(wunsch) + 1} bekommen.")
+                st.write(f"{wr["name"]}: {sum(df[f"Einteilung {wr["name"]}"] == [workshopname_dict[x] for x in wunsch])} Teilnehmer haben ihren Wunsch { wuensche.index(wunsch) + 1} bekommen.")
     st.write("Hier das Ergebnis der Einteilung:")
     st.write(df)
     
