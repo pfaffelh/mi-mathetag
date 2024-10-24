@@ -22,15 +22,18 @@ def update_groesse(wr, w):
     st.session_state.workshopreihe[st.session_state.workshopreihe.index(wr)]['data'][wr['data'].index(w)]["groesse"] = st.session_state[f"{w['name_kurz']}_size"]
 
 st.write("Es werden folgende Workshops angeboten:")
+col = st.columns([1,1,1])
+
 for wr in st.session_state.workshopreihe:
-    col0, col1, col2 = st.columns([1,4,1])
-    col0.write(f"{wr['name']}:")
-    for w in wr["data"]:
-        col0, col1, col2, col3 = st.columns([1,4,1,2])
-        col1.write(f"{w['name']}: {w['titel']}")
-        w['groesse'] = col2.number_input("Größe", min_value = 0, value = w['groesse'], on_change = update_groesse, args = (wr, w,), key = f"{w['name_kurz']}_size")
+    with col[st.session_state.workshopreihe.index(wr)]:
+        st.write(f"{wr['name']}:")
+        for w in wr["data"]:
+            col0, col1 = st.columns([4,1])
+            col0.write(f"{w['name']}: {w['titel']}")
+            w['groesse'] = col1.number_input("Größe", min_value = 0, value = w['groesse'], on_change = update_groesse, args = (wr, w,), key = f"{w['name_kurz']}_size")
+            st.write("")
         wr["groesse"] = sum([int(w['groesse']) for w in wr['data']])
-    col1.write(f"**Insgesamt gibt es {wr['groesse']} Plätze.**")
+        st.write(f"**Insgesamt gibt es {wr['groesse']} Plätze.**")
 st.write("### Anmeldungen")
 st.write("Es liegen Anmeldungen in einer csv-Datei in Folgendem Format vor:")
 df = pd.read_csv("anmeldungen.csv", sep=";")
@@ -41,7 +44,7 @@ if anmeldungen_csv:
     df = pd.read_csv(anmeldungen_csv, sep = ";", index_col=False)
     df = df.drop_duplicates(subset='Nachname', keep='last')
     #df = pd.read_csv("anmeldungen.csv", index_col=False)
-    col1.write(f"**Insgesamt gibt es {df.shape[0]} Anmeldungen.**")
+    st.write(f"**Insgesamt gibt es {df.shape[0]} Anmeldungen.**")
     st.write("Nun wird die Einteilung vorgenommen.")
     for wr in st.session_state.workshopreihe:    
         with st.expander(f"Einteilung von {wr["name"]}"):
