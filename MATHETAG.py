@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+from io import BytesIO
 import numpy as np
+import random
 from itertools import combinations
 from scipy.optimize import linear_sum_assignment
 from config import *
@@ -10,7 +12,6 @@ st.set_page_config(page_title="Mathetag Einteilung", layout="wide")
 # Es liegt eine csv-Datei vor mit Feldern
 #Dateiname;Vorname;Nachname;Mail;Vormittagskurs1;Vormittagskurs2;Nachmittagskurs1;Nachmittagskurs2;Schule;Stufe;Mathematiklehrkraft
 # Ziel ist es, zwei Spalten zu Ergänzungen: Zuteilung Vormittag, Zuteilung Nachmittag
-
 
 # In config.py sind die Workshops definiert. Der "name" gibt dabei jeweils den Workshop an
 
@@ -75,6 +76,8 @@ if anmeldungen_csv:
             spalten = []
             for w in wr["data"]:
                 spalten.extend([w['name_kurz'] for i in range(w['groesse'])])
+            random.seed(42)
+            random.shuffle(spalten)
             # Zunächst gehen wir von maximalen Kosten aus
             kosten = wr["kosten"][-1] + np.zeros((df.shape[0], len(spalten)))
             for i in range(kosten.shape[0]):
@@ -90,6 +93,35 @@ if anmeldungen_csv:
             # Ein wenig Statistik
             for wunsch in wuensche:
                 st.write(f"{wr["name"]}: {sum(df[f"Einteilung {wr["name"]}"] == [workshopname_dict[x] for x in wunsch])} Teilnehmer haben ihren Wunsch { wuensche.index(wunsch) + 1} bekommen.")
+            for w in wr["data"]:
+                st.write(f"Zu {w['name']} sind {sum(df[f"Einteilung {wr["name"]}"] == w["name"])} Teilnehmer eingeteilt.")
     st.write("Hier das Ergebnis der Einteilung:")
     st.write(df)
-    
+
+    output = BytesIO()
+    def to_excel(df):
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+            worksheet = writer.sheets['Sheet1']
+
+            # Automatische Anpassung der Spaltenbreite an die Inhalte
+            for col in worksheet.columns:
+                max_length = 0
+                col_letter = col[0].column_letter  # Spaltenbuchstabe (z.B., 'A', 'B', 'C')
+                for cell in col:
+                    try:
+                        max_length = max(max_length, len(str(cell.value)))
+                    except:
+                        pass
+                adjusted_width = max_length + 2  # +2 für Puffer
+                worksheet.column_dimensions[col_letter].width = adjusted_width
+        return output.getvalue()
+
+    # Streamlit-Button für den Download
+    excel_data = to_excel(df)
+    st.download_button(
+        label="Download Excel-Datei",
+        data=excel_data,
+        file_name="anmeldungen.xls",
+        mime="application/vnd.ms-excel"
+    )
