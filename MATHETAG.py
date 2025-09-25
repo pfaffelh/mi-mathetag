@@ -5,7 +5,7 @@ import numpy as np
 import random
 from itertools import combinations
 from scipy.optimize import linear_sum_assignment
-from config import *
+from config2025 import *
 
 st.set_page_config(page_title="Mathetag Einteilung", layout="wide")
 
@@ -15,7 +15,7 @@ st.set_page_config(page_title="Mathetag Einteilung", layout="wide")
 
 # In config.py sind die Workshops definiert. Der "name" gibt dabei jeweils den Workshop an
 
-st.header("Einteilung für den Mathetag am 15.11.2024")
+st.header(f"Einteilung für den Mathetag am {datum}")
 
 if "workshopreihe" not in st.session_state:
     st.session_state.workshopreihe = workshopreihe
