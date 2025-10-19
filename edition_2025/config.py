@@ -1,0 +1,131 @@
+import streamlit as st
+import socket , netrc, os
+
+# Konfiguration für den Mathetag 2025
+
+# Workshopreihen
+
+# kosten[0]: falls man den Erstwunsch bekommt
+# kosten[1]: falls man den Zweitwunsch bekommt
+# kosten[2]: falls man keinen der beiden Wünschen bekommt
+
+datum = "14.11.2025"
+
+workshopreihe = [
+    {
+        "name" : "Vormittag",
+        "wunschspalten" : [8, 9],
+        "kosten" : [0, 2, 5],
+        "data" : [{
+                "name_kurz" : "Workshop 1: Kartenspiel-Algebra - Die Struktur hinter Dobble", # So steht es in der Ausgabe des Anmeldetools
+                "name" : "Workshop 1",
+                "titel" : "Kartenspiel-Algebra – die Struktur hinter „Dobble“ (Dr. Ernst August von Hammerstein)",
+                "groesse" : 30
+            },
+            {
+                "name_kurz" : "Workshop 2: Hilberts Hotel - Unendlichkeiten in der Mathematik", # So steht es in der Ausgabe des Anmeldetools
+                "name" : "Workshop 2",
+                "titel" : "Hilberts Hotel - Unendlichkeiten in der Mathematik (Dr. Stefan Ludwig)",
+                "groesse" : 30
+            },
+            {
+                "name_kurz" : "Workshop 3: Öffentliches Vereinbaren geheimer Schlüssel", # So steht es in der Ausgabe des Anmeldetools
+                "name" : "Workshop 3",
+                "titel" : "Öffentliches Vereinbaren geheimer Schlüssel (Prof. Dr. Wolfgang Soergel)",
+                "groesse" : 30
+            }
+        ]
+    },
+    {
+        "name" : "Nachmittag",
+        "wunschspalten" : [10, 11],
+        "kosten" : [0, 2, 5],
+        "data" : [{
+                "name_kurz" : "Workshop 4: Die Mathematik des Jonglierens",
+                "name" : "Workshop 4",
+                "titel" : "Die Mathematik des Jonglierens (Dr. Jonathan Brugger)",
+                "groesse" : 30
+                },
+            {
+                "name_kurz" : "Workshop 5: Die unglaubliche Beweis-Maschine",
+                "name" : "Workshop 5",
+                "titel" : "Die unglaubliche Beweis-Maschine (Prof. Dr. Peter Pfaffelhuber)",
+                "groesse" : 30
+            },
+            {
+                "name_kurz" : "Workshop 6: Topologie - ein Papierband ohne Innen und Außen",
+                "name" : "Workshop 6",
+                "titel" : "Topologie – ein Band aus Papier ohne Innen und Außen (Dr. Maximilian Stegemeyer)",
+                "groesse" : 30
+            }
+        ]
+    }
+]
+
+hostname = socket.gethostname()
+ip_address = socket.gethostbyname(hostname)
+
+if (ip_address == "127.0.1.1"):
+    netrc = netrc.netrc()
+elif os.getcwd() == "/home/flask-reader/mi-wunsch":
+    netrc = netrc.netrc("/home/flask-reader/netrc")
+else:
+    netrc = netrc.netrc("/usr/local/lib/mi-hp/.netrc")
+
+# Mailversand
+smtp_user, _, smtp_password = netrc.authenticators("mail.uni-freiburg.de")
+empfaenger_email = "p.p@stochastik.uni-freiburg.de"  
+empfaenger_email_admin = "p.p@stochastik.uni-freiburg.de"  
+
+mail_absender = "noreply@math.uni-freiburg.de"
+
+mail_betreff = "Einteilung für den Mathetag am " + datum
+
+mail_body = """
+Hallo {Vorname} {Nachname},
+<br>
+<br>
+anbei erhälst Du die Einteilung für den <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Mathetag am 14.11.2025</a>. Du bist in den folgenden Workshops eingeteilt:
+<br>
+<ul>
+<li>Vormittag: {EinteilungVormittag} ({WorkshopnameVormittag})</li>
+<li>Nachmittag: {EinteilungNachmittag} ({WorkshopnameNachmittag})</li>
+</ul>
+Wir freuen uns auf Deine Teilnahme!
+<br>
+<br>
+Mit freundlichen Grüßen <br>
+Dein Mathetag-Team
+<br>
+<br>
+<br>
+<p>
+    Du erhälst diese Mail, weil Du Dich für den <a href='https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/'>Mathetag des Mathematischen Instituts</a> angemeldet hast. Bei Fragen schreibe bitte direkt an 
+    <a href="mailto:didaktik@math.uni-freiburg.de">uns</a>.
+</p>
+<p>Universität Freiburg<br>
+Abteilung Didaktik der Mathematik<br>
+Ernst-Zermelo-Str. 1<br>
+79104 Freiburg
+</p>
+<img
+    src="https://www.math.uni-freiburg.de/static/images/ufr.png"
+    alt="Universität Freiburg"
+    width="300"
+/>
+<br />
+"""
+
+workshop_dict = { w["name_kurz"] : w["titel"] for wr in workshopreihe for w in wr["data"] }
+workshopname_dict = { w["name_kurz"] : w["name"] for wr in workshopreihe for w in wr["data"] }
+workshopsize_dict = { w["name_kurz"] : w["groesse"] for wr in workshopreihe for w in wr["data"] }
+
+for wr in workshopreihe:
+    wr["anzahl_wuensche"] = len(wr["wunschspalten"])
+    if len(wr["wunschspalten"]) + 1 != len(wr["kosten"]):
+        st.error(f"Konfiguration fehlerhaft. In {wr['name']} ist eine falsche Anzahl von Kosten angegeben. (Muss eins mehr als die Anzahl der Wunschspalten sein.)") 
+
+spaltenname_vorname = "Name (Vorname)"
+spaltenname_name = "Name (Nachname)"
+spaltenname_email = "E-Mail (E-Mail eingeben)"
+

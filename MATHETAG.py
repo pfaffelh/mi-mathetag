@@ -5,13 +5,91 @@ import numpy as np
 import random
 from itertools import combinations
 from scipy.optimize import linear_sum_assignment
-from config2025 import *
+from edition_2025.config import *
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.header import decode_header, make_header
 
 st.set_page_config(page_title="Mathetag Einteilung", layout="wide")
 
-# Es liegt eine csv-Datei vor mit Feldern
-#Dateiname;Vorname;Nachname;Mail;Vormittagskurs1;Vormittagskurs2;Nachmittagskurs1;Nachmittagskurs2;Schule;Stufe;Mathematiklehrkraft
+
+def print_readable_email(msg: MIMEMultipart):
+    """Gibt eine MIMEMultipart-Nachricht mit dekodierten Headern aus."""
+    
+    # 1. Header dekodieren und korrigiert ausgeben
+    st.write("--- DEKODIERTE HEADER ---")
+    for key, value in msg.items():
+        # make_header konvertiert die komplexe Kodierung (?=utf-8?...) in einen einfachen String
+        decoded_value = str(make_header(decode_header(value)))
+        st.write(f"{key}: {decoded_value}")
+    
+    # 2. Body-Inhalt ausgeben
+    st.write("--- E-MAIL BODY (HTML/TEXT) ---")
+    if msg.is_multipart():
+        # Durch die Teile der Multipart-Nachricht iterieren
+        for part in msg.walk():
+            ctype = part.get_content_type()
+            cdisp = part.get('Content-Disposition')
+
+            # Nur Text- oder HTML-Teile ohne Anhang berücksichtigen
+            if ctype in ('text/plain', 'text/html') and cdisp is None:
+                try:
+                    payload = part.get_payload(decode=True)
+                    charset = part.get_content_charset() or 'utf-8'
+                    text = payload.decode(charset) if isinstance(payload, (bytes, bytearray)) else str(payload)
+
+                    st.write(f"Content-Type: {ctype}")
+                    if ctype == 'text/html':
+                        # Quelltext anzeigen
+                        st.code(text, language='html')
+                        # Optional: HTML gerendert anzeigen (unsafe_allow_html=True)
+                        st.markdown("**Gerendertes HTML:**", unsafe_allow_html=False)
+                        st.markdown(text, unsafe_allow_html=True)
+                    else:
+                        # Plain-Text anzeigen
+                        st.text(text)
+                except Exception as e:
+                        st.write(f"[Konnten Teil {ctype} nicht dekodieren: {e}]")
+    else:
+        # Für einfache (nicht-multipart) Nachrichten
+        st.write(msg.get_payload())
+    st.write("-------------------------------\n")
+    
+def to_excel(df, output):
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+        worksheet = writer.sheets['Sheet1']
+
+        # Automatische Anpassung der Spaltenbreite an die Inhalte
+        for col in worksheet.columns:
+            max_length = 0
+            col_letter = col[0].column_letter  # Spaltenbuchstabe (z.B., 'A', 'B', 'C')
+            for cell in col:
+                try:
+                    max_length = max(max_length, len(str(cell.value)))
+                except:
+                    pass
+            adjusted_width = max_length + 2  # +2 für Puffer
+            worksheet.column_dimensions[col_letter].width = adjusted_width
+    return output.getvalue()
+
+
+# Es liegt eine xls-Datei vor mit Feldern
+# 1. Name (Vorname)	
+# 2. Name (zweiter Vorname)	
+# 3. Name (Nachname)	
+# 4. Name (Nachspann)	
+# 5. E-Mail (E-Mail eingeben)	
+# 6. Klassenstufe	
+# 7. Schule	
+# 8. Welche Workshops willst du am Vormittag besuchen?	
+# 9. Erstwunsch Vormittag:	
+# 10. Zweitwunsch Vormittag (falls der Workshop von Erstwunsch bereits voll ist):	
+# 11. Erstwunsch Nachmittag:	
+# 12. Zweitwunsch  Nachmittag (falls der Workshop von Erstwunsch bereits voll ist):
 # Ziel ist es, zwei Spalten zu Ergänzungen: Zuteilung Vormittag, Zuteilung Nachmittag
+# Im Anschluss an die Einteilung werden Mails verschickt.
 
 # In config.py sind die Workshops definiert. Der "name" gibt dabei jeweils den Workshop an
 
@@ -19,6 +97,8 @@ st.header(f"Einteilung für den Mathetag am {datum}")
 
 if "workshopreihe" not in st.session_state:
     st.session_state.workshopreihe = workshopreihe
+if "xls_einteilung" not in st.session_state:
+    st.session_state.xls_einteilung = ""
 
 def update_groesse(wr, w):
     st.session_state.workshopreihe[st.session_state.workshopreihe.index(wr)]['data'][wr['data'].index(w)]["groesse"] = st.session_state[f"{w['name_kurz']}_size"]
@@ -37,15 +117,13 @@ for wr in st.session_state.workshopreihe:
         wr["groesse"] = sum([int(w['groesse']) for w in wr['data']])
         st.write(f"**Insgesamt gibt es {wr['groesse']} Plätze.**")
 st.write("### Anmeldungen")
-st.write("Es liegen Anmeldungen in einer csv-Datei in Folgendem Format vor:")
-df = pd.read_csv("anmeldungen.csv", sep=";")
+st.write("Es liegen Anmeldungen in einer xls-Datei vor:")
 
-anmeldungen_csv = st.file_uploader("Upload Anmeldungen")
+anmeldungen_xls = st.file_uploader("Upload Anmeldungen")
 
-if anmeldungen_csv:
-    df = pd.read_csv(anmeldungen_csv, sep = ";", index_col=False)
-    df = df.drop_duplicates(subset='Nachname', keep='last')
-    #df = pd.read_csv("anmeldungen.csv", index_col=False)
+if anmeldungen_xls:
+    df = pd.read_excel(anmeldungen_xls)
+    df = df.drop_duplicates(subset=spaltenname_email, keep='last')
     st.write(f"**Insgesamt gibt es {df.shape[0]} Anmeldungen.**")
     st.write("Nun wird die Einteilung vorgenommen.")
     for wr in st.session_state.workshopreihe:    
@@ -125,3 +203,71 @@ if anmeldungen_csv:
         file_name="anmeldungen.xls",
         mime="application/vnd.ms-excel"
     )
+
+with st.expander("Mail-Template", expanded=False):
+    st.write(f"Hier ist das Mail-Template. Falls Einträge in den Spalten verwendet werden sollen, schreiben Sie {'{Spaltenname}'}, z.B. {{{spaltenname_vorname}}} für den Vornamen.")
+    st.write(f"Die Mails an die Teilnehmer werden von der Mail-Adresse {smtp_user} versendet. Im Postausgang dieser Mail-Adresse befinden sich Kopien der verschickten Mails.")
+
+    st.session_state.mail_betreff = st.text_input("Mail-Betreff", value=mail_betreff, key="mail_betreff1")
+    st.session_state.mail_body = st.text_area("Mail-Template", value=mail_body, height=300, key="mail_template1")
+
+st.session_state.xls_einteilung = st.file_uploader("Einteilung für den Versand (xls)", key = "data_einteilung")
+st.write("Die Datei hat dieselbe Form wir die soeben heruntergeladene.")
+if st.session_state.xls_einteilung:
+    df = pd.read_excel(st.session_state.xls_einteilung).fillna("")
+    df.fillna("", inplace=True)
+
+    with st.expander("Mails generieren und verschicken"):
+        EMAIL_SPALTE = 'Mail'
+        NAME_SPALTE = 'Nachname'
+        VORNAME_SPALTE = 'Vorname' # Optionale Personalisierung
+
+        for index, row in df.iterrows():
+            empfaenger_email = row[spaltenname_email]
+            nachname = row[spaltenname_name]
+            vorname = row[spaltenname_vorname]
+            einteilungVormittag = row["Einteilung Vormittag"]
+            workshopnameVormittag = row["Workshopname Vormittag"]
+            einteilungNachmittag = row["Einteilung Nachmittag"]
+            workshopnameNachmittag = row["Workshopname Nachmittag"]
+
+            # Personalisierung des Betreffs und des Body
+            personalisierte_betreff = st.session_state.mail_betreff.format(Nachname=nachname, Vorname=vorname)
+            personalisierte_body = st.session_state.mail_body.format(Nachname=nachname, Vorname=vorname, EinteilungVormittag = einteilungVormittag, WorkshopnameVormittag = workshopnameVormittag, EinteilungNachmittag = einteilungNachmittag, WorkshopnameNachmittag = workshopnameNachmittag)
+
+            # E-Mail-Objekt erstellen (MIMEMultipart für HTML-Inhalte)
+            msg = MIMEMultipart()
+            msg['From'] = smtp_user 
+            # msg['Reply-To'] = "noreply@math.uni-freiburg.de" 
+            msg['To'] = empfaenger_email
+            msg['Subject'] = personalisierte_betreff
+            msg.attach(MIMEText(personalisierte_body, 'html')) # Inhalt als HTML hinzufügen                
+            print_readable_email(msg)
+
+        send_mails = st.button("Emails verschicken")
+        if send_mails: 
+            for index, row in df.iterrows():
+                empfaenger_email = row[spaltenname_email]
+                nachname = row[spaltenname_name]
+                vorname = row[spaltenname_vorname]
+                einteilungVormittag = row["Einteilung Vormittag"]
+                workshopnameVormittag = row["Workshopname Vormittag"]
+                einteilungNachmittag = row["Einteilung Nachmittag"]
+                workshopnameNachmittag = row["Workshopname Nachmittag"]
+
+                # Personalisierung des Betreffs und des Body
+                personalisierte_betreff = mail_betreff.format(Nachname=nachname, Vorname=vorname)
+                personalisierte_body = mail_body.format(Nachname=nachname, Vorname=vorname, EinteilungVormittag = einteilungVormittag, WorkshopnameVormittag = workshopnameVormittag, EinteilungNachmittag = einteilungNachmittag, WorkshopnameNachmittag = workshopnameNachmittag)
+
+                # E-Mail-Objekt erstellen (MIMEMultipart für HTML-Inhalte)
+                msg = MIMEMultipart()
+                msg['From'] = smtp_user
+                msg['To'] = empfaenger_email
+                msg['Subject'] = personalisierte_betreff
+                msg.attach(MIMEText(personalisierte_body, 'html')) # Inhalt als HTML hinzufügen                
+                with smtplib.SMTP_SSL("mail.uni-freiburg.de", 465) as server:
+                    server.login(smtp_user, smtp_password)
+                    print("Erfolgreich eingeloggt!")
+                    server.send_message(msg)
+                    print(f"E-Mail an {empfaenger_email} erfolgreich versendet!")
+                    server.quit()
