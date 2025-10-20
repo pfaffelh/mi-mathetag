@@ -1,5 +1,5 @@
 import streamlit as st
-import socket , netrc, os
+import socket, os
 
 # Konfiguration für den Mathetag 2025
 
@@ -65,22 +65,8 @@ workshopreihe = [
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
 
-if (ip_address == "127.0.1.1"):
-    netrc = netrc.netrc()
-elif os.getcwd() == "/home/flask-reader/mi-wunsch":
-    netrc = netrc.netrc("/home/flask-reader/netrc")
-else:
-    netrc = netrc.netrc("/usr/local/lib/mi-hp/.netrc")
-
-# Mailversand
-smtp_user, _, smtp_password = netrc.authenticators("mail.uni-freiburg.de")
-empfaenger_email = "p.p@stochastik.uni-freiburg.de"  
-empfaenger_email_admin = "p.p@stochastik.uni-freiburg.de"  
-
-mail_absender = "noreply@math.uni-freiburg.de"
-
 mail_betreff = "Einteilung für den Mathetag am " + datum
-
+    
 mail_body = """
 Hallo {Vorname} {Nachname},
 <br>

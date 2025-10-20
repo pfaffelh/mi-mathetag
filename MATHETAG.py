@@ -13,7 +13,31 @@ from email.header import decode_header, make_header
 
 st.set_page_config(page_title="Mathetag Einteilung", layout="wide")
 
+def make_mails(df, smtp_user):
+    messages = []
+    for index, row in df.iterrows():
+        empfaenger_email = row[spaltenname_email]
+        nachname = row[spaltenname_name]
+        vorname = row[spaltenname_vorname]
+        einteilungVormittag = row["Einteilung Vormittag"]
+        workshopnameVormittag = row["Workshopname Vormittag"]
+        einteilungNachmittag = row["Einteilung Nachmittag"]
+        workshopnameNachmittag = row["Workshopname Nachmittag"]
 
+        # Personalisierung des Betreffs und des Body
+        personalisierte_betreff = st.session_state.mail_betreff.format(Nachname=nachname, Vorname=vorname)
+        personalisierte_body = st.session_state.mail_body.format(Nachname=nachname, Vorname=vorname, EinteilungVormittag = einteilungVormittag, WorkshopnameVormittag = workshopnameVormittag, EinteilungNachmittag = einteilungNachmittag, WorkshopnameNachmittag = workshopnameNachmittag)
+
+        # E-Mail-Objekt erstellen (MIMEMultipart für HTML-Inhalte)
+        msg = MIMEMultipart()
+        msg['From'] = smtp_user 
+        # msg['Reply-To'] = "noreply@math.uni-freiburg.de" 
+        msg['To'] = empfaenger_email
+        msg['Subject'] = personalisierte_betreff
+        msg.attach(MIMEText(personalisierte_body, 'html')) # Inhalt als HTML hinzufügen 
+        messages.append(msg)
+    return messages
+        
 def print_readable_email(msg: MIMEMultipart):
     """Gibt eine MIMEMultipart-Nachricht mit dekodierten Headern aus."""
     
@@ -206,8 +230,7 @@ if anmeldungen_xls:
 
 with st.expander("Mail-Template", expanded=False):
     st.write(f"Hier ist das Mail-Template. Falls Einträge in den Spalten verwendet werden sollen, schreiben Sie {'{Spaltenname}'}, z.B. {{{spaltenname_vorname}}} für den Vornamen.")
-    st.write(f"Die Mails an die Teilnehmer werden von der Mail-Adresse {smtp_user} versendet. Im Postausgang dieser Mail-Adresse befinden sich Kopien der verschickten Mails.")
-
+    st.write(f"Der Absender der Mails muss sich weiter unten einloggen. Im Postausgang dieser Mail-Adresse befinden sich Kopien der verschickten Mails.")
     st.session_state.mail_betreff = st.text_input("Mail-Betreff", value=mail_betreff, key="mail_betreff1")
     st.session_state.mail_body = st.text_area("Mail-Template", value=mail_body, height=300, key="mail_template1")
 
@@ -218,56 +241,28 @@ if st.session_state.xls_einteilung:
     df.fillna("", inplace=True)
 
     with st.expander("Mails generieren und verschicken"):
-        EMAIL_SPALTE = 'Mail'
-        NAME_SPALTE = 'Nachname'
-        VORNAME_SPALTE = 'Vorname' # Optionale Personalisierung
-
-        for index, row in df.iterrows():
-            empfaenger_email = row[spaltenname_email]
-            nachname = row[spaltenname_name]
-            vorname = row[spaltenname_vorname]
-            einteilungVormittag = row["Einteilung Vormittag"]
-            workshopnameVormittag = row["Workshopname Vormittag"]
-            einteilungNachmittag = row["Einteilung Nachmittag"]
-            workshopnameNachmittag = row["Workshopname Nachmittag"]
-
-            # Personalisierung des Betreffs und des Body
-            personalisierte_betreff = st.session_state.mail_betreff.format(Nachname=nachname, Vorname=vorname)
-            personalisierte_body = st.session_state.mail_body.format(Nachname=nachname, Vorname=vorname, EinteilungVormittag = einteilungVormittag, WorkshopnameVormittag = workshopnameVormittag, EinteilungNachmittag = einteilungNachmittag, WorkshopnameNachmittag = workshopnameNachmittag)
-
-            # E-Mail-Objekt erstellen (MIMEMultipart für HTML-Inhalte)
-            msg = MIMEMultipart()
-            msg['From'] = smtp_user 
-            # msg['Reply-To'] = "noreply@math.uni-freiburg.de" 
-            msg['To'] = empfaenger_email
-            msg['Subject'] = personalisierte_betreff
-            msg.attach(MIMEText(personalisierte_body, 'html')) # Inhalt als HTML hinzufügen                
-            print_readable_email(msg)
-
+        st.session_state.mail_vorname = st.text_input("Vorname")
+        st.session_state.mail_nachname = st.text_input("Nachname")
+        st.session_state.mail_from = st.text_input("Absende-Mail-Adresse")
+        if st.session_state.mail_vorname != "" or st.session_state.mail_nachname != "":
+            st.session_state.mail_from = f"{st.session_state.mail_vorname} {st.session_state.mail_nachname} <{st.session_state.mail_from}>"
+        
+        st.session_state.mail_password = st.text_input("Passwort eingeben:", type="password")        
+        messages = make_mails(df, st.session_state.mail_from)
         send_mails = st.button("Emails verschicken")
         if send_mails: 
-            for index, row in df.iterrows():
-                empfaenger_email = row[spaltenname_email]
-                nachname = row[spaltenname_name]
-                vorname = row[spaltenname_vorname]
-                einteilungVormittag = row["Einteilung Vormittag"]
-                workshopnameVormittag = row["Workshopname Vormittag"]
-                einteilungNachmittag = row["Einteilung Nachmittag"]
-                workshopnameNachmittag = row["Workshopname Nachmittag"]
-
-                # Personalisierung des Betreffs und des Body
-                personalisierte_betreff = mail_betreff.format(Nachname=nachname, Vorname=vorname)
-                personalisierte_body = mail_body.format(Nachname=nachname, Vorname=vorname, EinteilungVormittag = einteilungVormittag, WorkshopnameVormittag = workshopnameVormittag, EinteilungNachmittag = einteilungNachmittag, WorkshopnameNachmittag = workshopnameNachmittag)
-
-                # E-Mail-Objekt erstellen (MIMEMultipart für HTML-Inhalte)
-                msg = MIMEMultipart()
-                msg['From'] = smtp_user
-                msg['To'] = empfaenger_email
-                msg['Subject'] = personalisierte_betreff
-                msg.attach(MIMEText(personalisierte_body, 'html')) # Inhalt als HTML hinzufügen                
+            for msg in messages:
                 with smtplib.SMTP_SSL("mail.uni-freiburg.de", 465) as server:
-                    server.login(smtp_user, smtp_password)
-                    print("Erfolgreich eingeloggt!")
-                    server.send_message(msg)
-                    print(f"E-Mail an {empfaenger_email} erfolgreich versendet!")
-                    server.quit()
+                    try:
+                        server.login(st.session_state.mail_from, st.session_state.mail_password)
+                        st.write("Erfolgreich eingeloggt!")
+                        server.send_message(msg)
+                        st.write(f"E-Mail an {msg['To']} erfolgreich versendet!")
+                        server.quit()
+                    except: 
+                        st.write("Mails konnten nicht versandt werden.")
+
+        st.write("-------------------------------\n")
+        st.write("Hier sind die Mails, die durch den Button verschickt werden:")
+        for msg in messages: 
+            print_readable_email(msg)
