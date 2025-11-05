@@ -158,12 +158,11 @@ if anmeldungen_xls:
                 st.write(f"Einteilung in {wr['name']} möglich, es gibt genug Plätze.")
 
             # Diese Liste von Listen gibt die Wünsche der Teilnehmer 
-            wuensche = [list(df[df.columns[i]]) for i in wr["wunschspalten"]]
-            allewuensche = [item for sublist in wuensche for item in sublist]        
+            wuensche = [list(df[df.columns[i]]) for i in wr["wunschspalten"]]            
+            allewuensche = [item for sublist in wuensche for item in sublist]
             # Wünsche müssen mit den Namen der Workshops übereinstimmen!
             w_namen = [w["name_kurz"] for w in wr["data"]]
             #st.write(allewuensche)
-            #st.write(w_namen)
             fehler = [w for w in allewuensche if w not in w_namen]
             if len(fehler):
                 st.warning(f"Wünsche {fehler} wurden angegeben, sind aber nicht wählbar!")
@@ -194,7 +193,7 @@ if anmeldungen_xls:
 
             # Ein wenig Statistik
             for wunsch in wuensche:
-                st.write(f"{wr["name"]}: {sum(df[f"Einteilung {wr["name"]}"] == [workshopname_dict[x] for x in wunsch])} Teilnehmer haben ihren Wunsch { wuensche.index(wunsch) + 1} bekommen.")
+                st.write(f"{wr["name"]}: {sum(df[f"Einteilung {wr["name"]}"] == [workshopname_dict.get(x, "") for x in wunsch])} Teilnehmer haben ihren Wunsch { wuensche.index(wunsch) + 1} bekommen.")
             for w in wr["data"]:
                 st.write(f"Zu {w['name']} sind {sum(df[f"Einteilung {wr["name"]}"] == w["name"])} Teilnehmer eingeteilt.")
     st.write("Hier das Ergebnis der Einteilung:")

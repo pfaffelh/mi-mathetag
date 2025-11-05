@@ -14,7 +14,7 @@ datum = "14.11.2025"
 workshopreihe = [
     {
         "name" : "Vormittag",
-        "wunschspalten" : [8, 9],
+        "wunschspalten" : [5, 6],
         "kosten" : [0, 2, 5],
         "data" : [{
                 "name_kurz" : "Workshop 1: Kartenspiel-Algebra - Die Struktur hinter Dobble", # So steht es in der Ausgabe des Anmeldetools
@@ -38,7 +38,7 @@ workshopreihe = [
     },
     {
         "name" : "Nachmittag",
-        "wunschspalten" : [10, 11],
+        "wunschspalten" : [7, 8],
         "kosten" : [0, 2, 5],
         "data" : [{
                 "name_kurz" : "Workshop 4: Die Mathematik des Jonglierens",
@@ -71,7 +71,7 @@ mail_body = """
 Hallo {Vorname} {Nachname},
 <br>
 <br>
-anbei erhälst Du die Einteilung für den <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Mathetag am 14.11.2025</a>. Du bist in den folgenden Workshops eingeteilt:
+anbei erhältst Du die Einteilung für den <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Mathetag am 14.11.2025</a>. Du bist in den folgenden Workshops eingeteilt:
 <br>
 <ul>
 <li>Vormittag: {EinteilungVormittag} ({WorkshopnameVormittag})</li>
@@ -86,7 +86,7 @@ Dein Mathetag-Team
 <br>
 <br>
 <p>
-    Du erhälst diese Mail, weil Du Dich für den <a href='https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/'>Mathetag des Mathematischen Instituts</a> angemeldet hast. Bei Fragen schreibe bitte direkt an 
+    Du erhältst diese Mail, weil Du Dich für den <a href='https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/'>Mathetag des Mathematischen Instituts</a> angemeldet hast. Bei Fragen schreibe bitte direkt an 
     <a href="mailto:didaktik@math.uni-freiburg.de">uns</a>.
 </p>
 <p>Universität Freiburg<br>
@@ -111,7 +111,7 @@ for wr in workshopreihe:
     if len(wr["wunschspalten"]) + 1 != len(wr["kosten"]):
         st.error(f"Konfiguration fehlerhaft. In {wr['name']} ist eine falsche Anzahl von Kosten angegeben. (Muss eins mehr als die Anzahl der Wunschspalten sein.)") 
 
-spaltenname_vorname = "Name (Vorname)"
-spaltenname_name = "Name (Nachname)"
+spaltenname_vorname = "Name (Vorspann)"
+spaltenname_name = "Name "
 spaltenname_email = "E-Mail (E-Mail eingeben)"
 

@@ -8,5 +8,5 @@ USERNAME="flask-reader"
 
 # Führe den Befehl "deploy" auf dem Remote-Server aus
 ssh $USERNAME@$SERVER 'cd mi-mathetag; git pull'
-ssh $USERNAME@$SERVER 'sudo ./deploy-mi-mathetag.sh > /dev/null'
+ssh $USERNAME@$SERVER 'sudo ./deploy-mi-mathetage.sh > /dev/null'
 
