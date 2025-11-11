@@ -240,6 +240,7 @@ if st.session_state.xls_einteilung:
     df.fillna("", inplace=True)
 
     with st.expander("Mails generieren und verschicken"):
+        st.write("Aus den nächstetn drei Feldern wird die Absender-Mail-Adresse generiert: vorname nachname <Mail_Adresse>")
         st.session_state.mail_vorname = st.text_input("Vorname")
         st.session_state.mail_nachname = st.text_input("Nachname")
         st.session_state.mail_from = st.text_input("Absende-Mail-Adresse")
