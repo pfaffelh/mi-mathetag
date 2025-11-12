@@ -150,7 +150,7 @@ if anmeldungen_xls:
     df = df.drop_duplicates(subset=spaltenname_email, keep='last')
     st.write(f"**Insgesamt gibt es {df.shape[0]} Anmeldungen.**")
     st.write("Nun wird die Einteilung vorgenommen.")
-    for wr in st.session_state.workshopreihe:    
+    for wr in st.session_state.workshopreihe:
         with st.expander(f"Einteilung von {wr["name"]}"):
             if df.shape[1] > wr['groesse']:
                 st.write(f"**Einteilung in {wr['name']} nicht möglich, da es {df.shape[1]} Anmeldungen, aber nur {wr['groesse']} Plätze gibt.**")
@@ -234,10 +234,19 @@ with st.expander("Mail-Template", expanded=False):
     st.session_state.mail_body = st.text_area("Mail-Template", value=mail_body, height=300, key="mail_template1")
 
 st.session_state.xls_einteilung = st.file_uploader("Einteilung für den Versand (xls)", key = "data_einteilung")
-st.write("Die Datei hat dieselbe Form wir die soeben heruntergeladene.")
+st.write("Die Datei muss dieselbe Form haben wie die soeben heruntergeladene.")
 if st.session_state.xls_einteilung:
     df = pd.read_excel(st.session_state.xls_einteilung).fillna("")
     df.fillna("", inplace=True)
+
+    # Ein wenig Statistik
+    for wr in st.session_state.workshopreihe:
+        summe = 0
+        for w in wr["data"]:
+            i = sum(df[f"Einteilung {wr["name"]}"] == w["name"])
+            st.write(f"Zu {w['name']} sind {i} Teilnehmer eingeteilt.")
+            summe = summe + i
+        st.write(f"Zu {wr['name']} sind insgesamt {summe} Pesonen eingeteilt.")
 
     with st.expander("Mails generieren und verschicken"):
         st.write("Aus den nächstetn drei Feldern wird die Absender-Mail-Adresse generiert: vorname nachname <Mail_Adresse>")

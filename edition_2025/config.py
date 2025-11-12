@@ -66,21 +66,24 @@ hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
 
 mail_betreff = "Einteilung für den Mathetag am " + datum
-    
+
 mail_body = """
 Hallo {Vorname} {Nachname},
 <br>
 <br>
-anbei erhältst Du die Einteilung für den <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Mathetag am 14.11.2025</a>. Du bist in den folgenden Workshops eingeteilt:
+wir freuen uns, dich am Freitag zum Mathe-Tag an der Universität Freiburg begrüßen zu dürfen. Wir starten um 8:45 Uhr im Hörsaal II (Obergeschoss) in der <a href="https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924">Albertstraße 23b</a>. Eine Wegbeschreibung findest du auf unserer <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Webseite</a>. 
+<br>
+Die Workshops haben wir so zugeteilt, dass möglichst viele ihren Erstwunsch bekommen. Dir wurden folgende Workshops zugeteilt:
 <br>
 <ul>
-<li>Vormittag: {EinteilungVormittag} ({WorkshopnameVormittag})</li>
-<li>Nachmittag: {EinteilungNachmittag} ({WorkshopnameNachmittag})</li>
+<li>Vormittag: {EinteilungVormittag}: {WorkshopnameVormittag}</li>
+<li>Nachmittag: {EinteilungNachmittag}: {WorkshopnameNachmittag}</li>
 </ul>
-Wir freuen uns auf Deine Teilnahme!
+Am Ende der Veranstaltung erhältst du von uns eine Teilnahmebescheinigung, die du in der Schule vorzeigen kannst.
 <br>
 <br>
-Mit freundlichen Grüßen <br>
+Viele Grüße,
+<br>
 Dein Mathetag-Team
 <br>
 <br>
