@@ -5,7 +5,7 @@ import numpy as np
 import random
 from itertools import combinations
 from scipy.optimize import linear_sum_assignment
-from edition_2025.config import *
+from edition_2026.config import *
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -141,24 +141,30 @@ for wr in st.session_state.workshopreihe:
         wr["groesse"] = sum([int(w['groesse']) for w in wr['data']])
         st.write(f"**Insgesamt gibt es {wr['groesse']} Plätze.**")
 st.write("### Anmeldungen")
-st.write("Es liegen Anmeldungen in einer xls-Datei vor:")
+st.write("Es liegen Anmeldungen in einer xls- oder csv-Datei (z.B. REDCap-Export, \"raw data\") vor:")
 
 anmeldungen_xls = st.file_uploader("Upload Anmeldungen")
 
 if anmeldungen_xls:
-    df = pd.read_excel(anmeldungen_xls)
-    df = df.drop_duplicates(subset=spaltenname_email, keep='last')
+    if anmeldungen_xls.name.lower().endswith(".csv"):
+        # z.B. REDCap-Export: Trennzeichen automatisch erkennen, BOM entfernen
+        df = pd.read_csv(anmeldungen_xls, sep = None, engine = "python", index_col=False, encoding = "utf-8-sig")
+    else:
+        df = pd.read_excel(anmeldungen_xls)
+    # Nicht nur nach Mail, da z.B. Geschwister oder Lehrkräfte dieselbe Adresse verwenden können
+    df = df.drop_duplicates(subset=[spaltenname_vorname, spaltenname_name, spaltenname_email], keep='last')
     st.write(f"**Insgesamt gibt es {df.shape[0]} Anmeldungen.**")
     st.write("Nun wird die Einteilung vorgenommen.")
     for wr in st.session_state.workshopreihe:
         with st.expander(f"Einteilung von {wr["name"]}"):
-            if df.shape[1] > wr['groesse']:
-                st.write(f"**Einteilung in {wr['name']} nicht möglich, da es {df.shape[1]} Anmeldungen, aber nur {wr['groesse']} Plätze gibt.**")
+            if df.shape[0] > wr['groesse']:
+                st.write(f"**Einteilung in {wr['name']} nicht möglich, da es {df.shape[0]} Anmeldungen, aber nur {wr['groesse']} Plätze gibt.**")
             else: 
                 st.write(f"Einteilung in {wr['name']} möglich, es gibt genug Plätze.")
 
             # Diese Liste von Listen gibt die Wünsche der Teilnehmer 
-            wuensche = [list(df[df.columns[i]]) for i in wr["wunschspalten"]]            
+            # wunschspalten: Spaltennamen (z.B. REDCap) oder Spaltennummern
+            wuensche = [list(df[i] if isinstance(i, str) else df[df.columns[i]]) for i in wr["wunschspalten"]]            
             allewuensche = [item for sublist in wuensche for item in sublist]
             # Wünsche müssen mit den Namen der Workshops übereinstimmen!
             w_namen = [w["name_kurz"] for w in wr["data"]]

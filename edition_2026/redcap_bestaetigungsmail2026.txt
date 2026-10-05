@@ -1,0 +1,43 @@
+REDCap: Applications -> Alerts & Notifications -> + Add New Alert
+=================================================================
+
+Titel des Alerts:      Bestätigung Anmeldung Mathetag 13.11.2026
+Trigger:               When a record is saved on a specific form -> anmeldung_mathetag
+                       (Option "Survey completion" bzw. "is saved with status Complete")
+Sendezeitpunkt:        Send immediately
+Wie oft:               Just once
+Von (From):            <Absender-Adresse des Mathetag-Teams>
+An (To):               [mail]   (Feld "mail" bei "Email fields" auswählen)
+Betreff:               Ihre Anmeldung zum Mathetag am 13.11.2026
+
+Nachricht:
+----------
+Hallo [vorname] [nachname],
+
+vielen Dank für Ihre Anmeldung zum Mathetag am 13.11.2026 an der Universität Freiburg.
+Wir haben folgende Angaben erhalten:
+
+Name:          [vorname] [nachname]
+E-Mail:        [mail]
+Schule:        [schule]
+Klassenstufe:  [stufe]
+Lehrkraft:     [lehrkraft]
+
+Workshops am Vormittag (10:00 – 11:30 Uhr)
+  Erstwunsch:  [vormittagskurs1_titel]
+  Zweitwunsch: [vormittagskurs2_titel]
+
+Workshops am Nachmittag (13:00 – 14:30 Uhr)
+  Erstwunsch:  [nachmittagskurs1_titel]
+  Zweitwunsch: [nachmittagskurs2_titel]
+
+Die endgültige Einteilung in die Workshops erhalten Sie in einer separaten E-Mail
+vor dem Mathetag. Wir versuchen, möglichst allen ihren Erstwunsch zu erfüllen.
+
+Mit freundlichen Grüßen
+Ihr Mathetag-Team
+
+Universität Freiburg
+Abteilung Didaktik der Mathematik
+Ernst-Zermelo-Str. 1
+79104 Freiburg
