@@ -79,7 +79,7 @@ mail_body = """
 <p>Hallo {Vorname} {Nachname},</p>
 
 <p>wir freuen uns, dich am Freitag, den {Datum}, zum Mathetag an der Universität
-Freiburg begrüßen zu dürfen. Wir starten um 8:45 Uhr im Hörsaal II (1. OG) des Instituts für Geo- und Umweltnaturwissenschaften in der <a href="https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924">Albertstraße 23b</a>. Eine Wegbeschreibung findest du auf unserer <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Webseite</a>.</p>
+Freiburg begrüßen zu dürfen. Wir starten um 8:45 Uhr im Hörsaal II (1. OG) des Instituts für Geo- und Umweltnaturwissenschaften in der <a href="https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924">Albertstraße 23b</a>. Alle weiteren Infos zum Mathetag – Programm, Ablauf und Wegbeschreibung – findest du auf unserer <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Webseite</a>.</p>
 
 <p>Die Workshops haben wir so zugeteilt, dass möglichst viele ihren Erstwunsch
 bekommen. Dir wurden folgende Workshops zugeteilt:</p>

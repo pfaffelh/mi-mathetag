@@ -23,11 +23,21 @@ anschliessend ueber die Toolbar.
 Die Workshop-Felder sind Dropdowns. REDCap pipt bei Dropdowns automatisch das
 Label (also den vollen Workshop-Titel), nicht den Code (ws1, ws2, ...).
 
-Der Zweitwunsch ist auf mehrere Felder verteilt (zweitwunschvm_ws1 bis
-zweitwunschvm_ws4 bzw. zweitwunschnm_ws5 bis zweitwunschnm_ws7), weil pro
-Erstwunsch ein eigenes Dropdown eingeblendet wird. Gefuellt ist immer genau
-eines davon, deshalb stehen sie direkt hintereinander - es erscheint dann nur
-der eine tatsaechlich gewaehlte Titel.
+Der Zweitwunsch ist in der Survey auf mehrere Felder verteilt
+(zweitwunschvm_ws1 bis zweitwunschvm_ws4 bzw. zweitwunschnm_ws5 bis
+zweitwunschnm_ws7), weil pro Erstwunsch ein eigenes Dropdown eingeblendet wird.
+Fuer die Mail rechnet das Dictionary das zusammen:
+
+  zweitwunschvm_code   @CALCTEXT  waehlt ueber den Erstwunsch das gueltige Feld
+  zweitwunschvm_titel  @CALCTEXT  macht aus dem Code den vollen Workshop-Titel
+
+In der Nachricht steht deshalb nur [zweitwunschvm_titel] bzw.
+[zweitwunschnm_titel]. Beide Felder sind @HIDDEN und tauchen in der Survey
+nicht auf.
+
+Nicht mehrere Piping-Tags unmittelbar aneinandersetzen: [feld_a][feld_b] ist in
+REDCap die Schreibweise fuer "Feld feld_b im Event feld_a" und liefert nichts.
+Genau daran ist eine fruehere Fassung dieser Vorlage gescheitert.
 
 Wichtig: Unter Project Setup -> Additional customizations muss die Option zum
 Leeren ausgeblendeter Felder aktiv sein ("erase the value"). Sonst bleibt beim
@@ -55,13 +65,13 @@ Freiburg. Wir haben folgende Angaben erhalten:</p>
 <p><b>Workshops am Vormittag (10:00 – 11:30 Uhr)</b></p>
 <ul>
 <li>Erstwunsch: [erstwunschvm]</li>
-<li>Zweitwunsch: [zweitwunschvm_ws1][zweitwunschvm_ws2][zweitwunschvm_ws3][zweitwunschvm_ws4]</li>
+<li>Zweitwunsch: [zweitwunschvm_titel]</li>
 </ul>
 
 <p><b>Workshops am Nachmittag (13:00 – 14:30 Uhr)</b></p>
 <ul>
 <li>Erstwunsch: [erstwunschnm]</li>
-<li>Zweitwunsch: [zweitwunschnm_ws5][zweitwunschnm_ws6][zweitwunschnm_ws7]</li>
+<li>Zweitwunsch: [zweitwunschnm_titel]</li>
 </ul>
 
 <p>Die endgültige Einteilung in die Workshops erhältst du in einer separaten
@@ -69,8 +79,7 @@ E-Mail vor dem Mathetag. Wir teilen so zu, dass möglichst viele ihren Erstwunsc
 bekommen.</p>
 
 <p>Wir starten um 8:45 Uhr im Hörsaal II (1. OG) des Instituts für Geo- und
-Umweltnaturwissenschaften in der <a href="https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924">Albertstraße 23b</a>. Eine
-Wegbeschreibung findest du auf unserer <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Webseite</a>.</p>
+Umweltnaturwissenschaften in der <a href="https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924">Albertstraße 23b</a>. Alle weiteren Infos zum Mathetag – Programm, Ablauf und Wegbeschreibung – findest du auf unserer <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Webseite</a>.</p>
 
 <p>Falls du doch nicht teilnehmen kannst, schreib uns bitte kurz an
 <a href="mailto:didaktik@math.uni-freiburg.de">didaktik@math.uni-freiburg.de</a>, damit dein Platz an jemand anderen gehen
@@ -109,20 +118,19 @@ Freiburg. Wir haben folgende Angaben erhalten:
 Workshops am Vormittag (10:00 – 11:30 Uhr)
 
 - Erstwunsch: [erstwunschvm]
-- Zweitwunsch: [zweitwunschvm_ws1][zweitwunschvm_ws2][zweitwunschvm_ws3][zweitwunschvm_ws4]
+- Zweitwunsch: [zweitwunschvm_titel]
 
 Workshops am Nachmittag (13:00 – 14:30 Uhr)
 
 - Erstwunsch: [erstwunschnm]
-- Zweitwunsch: [zweitwunschnm_ws5][zweitwunschnm_ws6][zweitwunschnm_ws7]
+- Zweitwunsch: [zweitwunschnm_titel]
 
 Die endgültige Einteilung in die Workshops erhältst du in einer separaten
 E-Mail vor dem Mathetag. Wir teilen so zu, dass möglichst viele ihren Erstwunsch
 bekommen.
 
 Wir starten um 8:45 Uhr im Hörsaal II (1. OG) des Instituts für Geo- und
-Umweltnaturwissenschaften in der Albertstraße 23b (https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924). Eine
-Wegbeschreibung findest du auf unserer Webseite (https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/).
+Umweltnaturwissenschaften in der Albertstraße 23b (https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924). Alle weiteren Infos zum Mathetag – Programm, Ablauf und Wegbeschreibung – findest du auf unserer Webseite (https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/).
 
 Falls du doch nicht teilnehmen kannst, schreib uns bitte kurz an
 didaktik@math.uni-freiburg.de, damit dein Platz an jemand anderen gehen
