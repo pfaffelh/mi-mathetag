@@ -35,6 +35,34 @@ def wunsch_spalte(df, spec):
     return list(df[spec] if isinstance(spec, str) else df[df.columns[spec]])
 
 
+WUNSCHLABEL = ["Erstwunsch", "Zweitwunsch", "Drittwunsch"]
+
+
+def wunschlabel(i):
+    return WUNSCHLABEL[i] if i < len(WUNSCHLABEL) else f"Wunsch {i + 1}"
+
+
+def ergebnis_spalten(df, workshopreihe):
+    """Spalten fuer Anzeige und Excel-Export, in dieser Reihenfolge.
+
+    Links stehen die Titel: erst die Wuensche, dann die Einteilung. Dahinter die
+    Angaben zur Person. Die REDCap-internen Spalten (record_id, Zeitstempel, die
+    einzelnen Zweitwunsch-Felder, Datenschutz-Haekchen, ...) fallen weg.
+
+    "Einteilung <Reihe>" (Workshop-Kurzname) und "Workshopname <Reihe>" (Titel)
+    bleiben erhalten: Die heruntergeladene Datei wird fuer den Mailversand wieder
+    hochgeladen, und make_mails() liest genau diese beiden Spalten.
+    """
+    spalten = [spaltenname_vorname, spaltenname_name]
+    for wr in workshopreihe:
+        for i in range(len(wr["wunschspalten"])):
+            spalten.append(f"{wunschlabel(i)} {wr['name']}")
+        spalten.append(f"Einteilung {wr['name']}")
+        spalten.append(f"Workshopname {wr['name']}")
+    spalten += [spaltenname_email, spaltenname_schule, spaltenname_stufe]
+    return [sp for sp in spalten if sp in df.columns]
+
+
 def make_mails(df, smtp_user):
     messages = []
     for index, row in df.iterrows():
@@ -195,6 +223,11 @@ if anmeldungen_xls:
             if len(fehler):
                 st.warning(f"Wünsche {fehler} wurden angegeben, sind aber nicht wählbar!")
 
+            # Die Wünsche als Titel in den Export - noch bevor unten doppelte
+            # Wünsche geleert werden, damit die Anzeige die Eingabe zeigt.
+            for i, wunsch in enumerate(wuensche):
+                df[f"{wunschlabel(i)} {wr["name"]}"] = [workshop_dict.get(w, "") for w in wunsch]
+
             # Doppelte Wünsche werden gelöscht:
             for wunsch1, wunsch2 in combinations(wuensche,2):
                 for i in range(len(wunsch1)):
@@ -224,6 +257,7 @@ if anmeldungen_xls:
                 st.write(f"{wr["name"]}: {sum(df[f"Einteilung {wr["name"]}"] == [workshopname_dict.get(x, "") for x in wunsch])} Teilnehmer haben ihren Wunsch { wuensche.index(wunsch) + 1} bekommen.")
             for w in wr["data"]:
                 st.write(f"Zu {w['name']} sind {sum(df[f"Einteilung {wr["name"]}"] == w["name"])} Teilnehmer eingeteilt.")
+    df = df[ergebnis_spalten(df, st.session_state.workshopreihe)]
     st.write("Hier das Ergebnis der Einteilung:")
     st.write(df)
 

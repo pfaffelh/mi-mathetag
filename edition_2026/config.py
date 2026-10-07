@@ -135,4 +135,6 @@ for wr in workshopreihe:
 spaltenname_vorname = "vorname"
 spaltenname_name = "nachname"
 spaltenname_email = "email"
+spaltenname_schule = "schule"
+spaltenname_stufe = "stufe"
 
