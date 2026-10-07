@@ -14,7 +14,7 @@ datum = "13.11.2026"
 workshopreihe = [
     {
         "name" : "Vormittag",
-        "wunschspalten" : ["vormittagskurs1", "vormittagskurs2"],
+        "wunschspalten" : ["erstwunschvm", ("zweitwunschvm_{}", "erstwunschvm")],
         "kosten" : [0, 2, 5],
         "data" : [
             {
@@ -45,7 +45,7 @@ workshopreihe = [
     },
     {
         "name" : "Nachmittag",
-        "wunschspalten" : ["nachmittagskurs1", "nachmittagskurs2"],
+        "wunschspalten" : ["erstwunschnm", ("zweitwunschnm_{}", "erstwunschnm")],
         "kosten" : [0, 2, 5],
         "data" : [
             {
@@ -76,42 +76,42 @@ ip_address = socket.gethostbyname(hostname)
 mail_betreff = "Einteilung für den Mathetag am " + datum
 
 mail_body = """
-Hallo {Vorname} {Nachname},
-<br>
-<br>
-wir freuen uns, dich am Freitag zum Mathe-Tag an der Universität Freiburg begrüßen zu dürfen. Wir starten um 8:45 Uhr im Hörsaal II (Obergeschoss) in der <a href="https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924">Albertstraße 23b</a>. Eine Wegbeschreibung findest du auf unserer <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Webseite</a>. 
-<br>
-Die Workshops haben wir so zugeteilt, dass möglichst viele ihren Erstwunsch bekommen. Dir wurden folgende Workshops zugeteilt:
-<br>
+<p>Hallo {Vorname} {Nachname},</p>
+
+<p>wir freuen uns, dich am Freitag, den {Datum}, zum Mathetag an der Universität
+Freiburg begrüßen zu dürfen. Wir starten um 8:45 Uhr im Hörsaal II (1. OG) des Instituts für Geo- und Umweltnaturwissenschaften in der <a href="https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924">Albertstraße 23b</a>. Eine Wegbeschreibung findest du auf unserer <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Webseite</a>.</p>
+
+<p>Die Workshops haben wir so zugeteilt, dass möglichst viele ihren Erstwunsch
+bekommen. Dir wurden folgende Workshops zugeteilt:</p>
+
 <ul>
-<li>Vormittag: {EinteilungVormittag}: {WorkshopnameVormittag}</li>
-<li>Nachmittag: {EinteilungNachmittag}: {WorkshopnameNachmittag}</li>
+<li><b>Vormittag (10:00 – 11:30 Uhr):</b> {EinteilungVormittag}: {WorkshopnameVormittag}</li>
+<li><b>Nachmittag (13:00 – 14:30 Uhr):</b> {EinteilungNachmittag}: {WorkshopnameNachmittag}</li>
 </ul>
-Am Ende der Veranstaltung erhältst du von uns eine Teilnahmebescheinigung, die du in der Schule vorzeigen kannst.
-<br>
-<br>
-Viele Grüße,
-<br>
-Dein Mathetag-Team
-<br>
-<br>
-<br>
-<p>
-    Du erhältst diese Mail, weil Du Dich für den <a href='https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/'>Mathetag des Mathematischen Instituts</a> angemeldet hast. Bei Fragen schreibe bitte direkt an 
-    <a href="mailto:didaktik@math.uni-freiburg.de">uns</a>.
-</p>
+
+<p>Am Ende der Veranstaltung erhältst du von uns eine Teilnahmebescheinigung,
+die du in der Schule vorzeigen kannst.</p>
+
+<p>Falls du doch nicht teilnehmen kannst, schreib uns bitte kurz an <a href="mailto:didaktik@math.uni-freiburg.de">didaktik@math.uni-freiburg.de</a>, damit dein Platz an jemand anderen gehen kann.</p>
+
+<p>Viele Grüße,<br>
+Dein Mathetag-Team</p>
+
+<p>Du erhältst diese Mail, weil du dich für den <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Mathetag des
+Mathematischen Instituts</a> angemeldet hast. Bei Fragen schreibe bitte direkt
+an <a href="mailto:didaktik@math.uni-freiburg.de">uns</a>.</p>
+
 <p>Universität Freiburg<br>
 Abteilung Didaktik der Mathematik<br>
 Ernst-Zermelo-Str. 1<br>
-79104 Freiburg
-</p>
-<img
-    src="https://www.math.uni-freiburg.de/static/images/ufr.png"
-    alt="Universität Freiburg"
-    width="300"
-/>
-<br />
+79104 Freiburg</p>
+
+<img src="https://www.math.uni-freiburg.de/static/images/ufr.png"
+     alt="Universität Freiburg" width="300" />
 """
+
+# {Datum} wird hier ersetzt, alle anderen Platzhalter erst in MATHETAG.py
+mail_body = mail_body.replace("{Datum}", datum)
 
 workshop_dict = { w["name_kurz"] : w["titel"] for wr in workshopreihe for w in wr["data"] }
 workshopname_dict = { w["name_kurz"] : w["name"] for wr in workshopreihe for w in wr["data"] }
@@ -123,7 +123,16 @@ for wr in workshopreihe:
         st.error(f"Konfiguration fehlerhaft. In {wr['name']} ist eine falsche Anzahl von Kosten angegeben. (Muss eins mehr als die Anzahl der Wunschspalten sein.)") 
 
 # Spaltennamen im REDCap-Export (Variablennamen aus edition_2026/redcap_datadictionary2026.csv)
+#
+# Ein Eintrag in "wunschspalten" ist entweder
+#   - ein Spaltenname bzw. Spaltenindex, oder
+#   - ein Tupel (Muster, Steuerspalte).
+# Das Tupel beschreibt einen Wunsch, den REDCap per Branching Logic auf mehrere
+# Spalten aufteilt: Die Zweitwunsch-Dropdowns heissen zweitwunschvm_ws1 ...
+# zweitwunschvm_ws4, und eingeblendet wird jeweils das Feld, das zum Erstwunsch
+# passt (so steht der Erstwunsch beim Zweitwunsch nicht mehr zur Auswahl).
+# Gelesen wird dann die Spalte Muster.format(Wert der Steuerspalte).
 spaltenname_vorname = "vorname"
 spaltenname_name = "nachname"
-spaltenname_email = "mail"
+spaltenname_email = "email"
 

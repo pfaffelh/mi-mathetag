@@ -2,40 +2,138 @@ REDCap: Applications -> Alerts & Notifications -> + Add New Alert
 =================================================================
 
 Titel des Alerts:      Bestätigung Anmeldung Mathetag 13.11.2026
-Trigger:               When a record is saved on a specific form -> anmeldung_mathetag
+Trigger:               When a record is saved on a specific form -> mathematiktag2026
                        (Option "Survey completion" bzw. "is saved with status Complete")
 Sendezeitpunkt:        Send immediately
 Wie oft:               Just once
-Von (From):            <Absender-Adresse des Mathetag-Teams>
-An (To):               [mail]   (Feld "mail" bei "Email fields" auswählen)
-Betreff:               Ihre Anmeldung zum Mathetag am 13.11.2026
+Von (From):            didaktik@math.uni-freiburg.de
+An (To):               [email]   (Feld "email" bei "Email fields" auswählen)
+Betreff:               Deine Anmeldung zum Mathetag am 13.11.2026
 
-Nachricht:
-----------
+Hinweise zur Nachricht:
+-----------------------
+Der Text ist mit mail_body in edition_2026/config.py abgeglichen (Anrede, Ort,
+Abmelde-Hinweis, Gruss, Fusszeile mit Logo), damit Bestaetigung und spaetere
+Einteilungsmail wie aus einer Hand wirken.
+
+Das Nachrichtenfeld in REDCap ist ein HTML-Editor. Fuege Variante A ueber den
+Quelltext-Button (<>) ein. Fehlt der Button, nimm Variante B und formatiere
+anschliessend ueber die Toolbar.
+
+Die Workshop-Felder sind Dropdowns. REDCap pipt bei Dropdowns automatisch das
+Label (also den vollen Workshop-Titel), nicht den Code (ws1, ws2, ...).
+
+Der Zweitwunsch ist auf mehrere Felder verteilt (zweitwunschvm_ws1 bis
+zweitwunschvm_ws4 bzw. zweitwunschnm_ws5 bis zweitwunschnm_ws7), weil pro
+Erstwunsch ein eigenes Dropdown eingeblendet wird. Gefuellt ist immer genau
+eines davon, deshalb stehen sie direkt hintereinander - es erscheint dann nur
+der eine tatsaechlich gewaehlte Titel.
+
+Wichtig: Unter Project Setup -> Additional customizations muss die Option zum
+Leeren ausgeblendeter Felder aktiv sein ("erase the value"). Sonst bleibt beim
+nachtraeglichen Aendern des Erstwunsches der alte Zweitwunsch stehen und in der
+Mail erscheinen zwei Titel. Die Einteilung in MATHETAG.py ist davon nicht
+betroffen, die liest gezielt das zum Erstwunsch passende Feld.
+
+
+=================================================================
+Variante A: HTML (ueber den Quelltext-Button einfuegen)
+=================================================================
+
+<p>Hallo [vorname] [nachname],</p>
+
+<p>vielen Dank für deine Anmeldung zum Mathetag am 13.11.2026 an der Universität
+Freiburg. Wir haben folgende Angaben erhalten:</p>
+
+<ul>
+<li><b>Name:</b> [vorname] [nachname]</li>
+<li><b>E-Mail:</b> [email]</li>
+<li><b>Schule:</b> [schule]</li>
+<li><b>Klassenstufe:</b> [stufe]</li>
+</ul>
+
+<p><b>Workshops am Vormittag (10:00 – 11:30 Uhr)</b></p>
+<ul>
+<li>Erstwunsch: [erstwunschvm]</li>
+<li>Zweitwunsch: [zweitwunschvm_ws1][zweitwunschvm_ws2][zweitwunschvm_ws3][zweitwunschvm_ws4]</li>
+</ul>
+
+<p><b>Workshops am Nachmittag (13:00 – 14:30 Uhr)</b></p>
+<ul>
+<li>Erstwunsch: [erstwunschnm]</li>
+<li>Zweitwunsch: [zweitwunschnm_ws5][zweitwunschnm_ws6][zweitwunschnm_ws7]</li>
+</ul>
+
+<p>Die endgültige Einteilung in die Workshops erhältst du in einer separaten
+E-Mail vor dem Mathetag. Wir teilen so zu, dass möglichst viele ihren Erstwunsch
+bekommen.</p>
+
+<p>Wir starten um 8:45 Uhr im Hörsaal II (1. OG) des Instituts für Geo- und
+Umweltnaturwissenschaften in der <a href="https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924">Albertstraße 23b</a>. Eine
+Wegbeschreibung findest du auf unserer <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Webseite</a>.</p>
+
+<p>Falls du doch nicht teilnehmen kannst, schreib uns bitte kurz an
+<a href="mailto:didaktik@math.uni-freiburg.de">didaktik@math.uni-freiburg.de</a>, damit dein Platz an jemand anderen gehen
+kann.</p>
+
+<p>Viele Grüße,<br>
+Dein Mathetag-Team</p>
+
+<p>Du erhältst diese Mail, weil du dich für den <a href="https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/">Mathetag des
+Mathematischen Instituts</a> angemeldet hast. Bei Fragen schreibe bitte direkt
+an <a href="mailto:didaktik@math.uni-freiburg.de">uns</a>.</p>
+
+<p>Universität Freiburg<br>
+Abteilung Didaktik der Mathematik<br>
+Ernst-Zermelo-Str. 1<br>
+79104 Freiburg</p>
+
+<img src="https://www.math.uni-freiburg.de/static/images/ufr.png"
+     alt="Universität Freiburg" width="300" />
+
+
+=================================================================
+Variante B: Klartext (direkt in den Editor)
+=================================================================
+
 Hallo [vorname] [nachname],
 
-vielen Dank für Ihre Anmeldung zum Mathetag am 13.11.2026 an der Universität Freiburg.
-Wir haben folgende Angaben erhalten:
+vielen Dank für deine Anmeldung zum Mathetag am 13.11.2026 an der Universität
+Freiburg. Wir haben folgende Angaben erhalten:
 
-Name:          [vorname] [nachname]
-E-Mail:        [mail]
-Schule:        [schule]
-Klassenstufe:  [stufe]
-Lehrkraft:     [lehrkraft]
+- Name: [vorname] [nachname]
+- E-Mail: [email]
+- Schule: [schule]
+- Klassenstufe: [stufe]
 
 Workshops am Vormittag (10:00 – 11:30 Uhr)
-  Erstwunsch:  [vormittagskurs1_titel]
-  Zweitwunsch: [vormittagskurs2_titel]
+
+- Erstwunsch: [erstwunschvm]
+- Zweitwunsch: [zweitwunschvm_ws1][zweitwunschvm_ws2][zweitwunschvm_ws3][zweitwunschvm_ws4]
 
 Workshops am Nachmittag (13:00 – 14:30 Uhr)
-  Erstwunsch:  [nachmittagskurs1_titel]
-  Zweitwunsch: [nachmittagskurs2_titel]
 
-Die endgültige Einteilung in die Workshops erhalten Sie in einer separaten E-Mail
-vor dem Mathetag. Wir versuchen, möglichst allen ihren Erstwunsch zu erfüllen.
+- Erstwunsch: [erstwunschnm]
+- Zweitwunsch: [zweitwunschnm_ws5][zweitwunschnm_ws6][zweitwunschnm_ws7]
 
-Mit freundlichen Grüßen
-Ihr Mathetag-Team
+Die endgültige Einteilung in die Workshops erhältst du in einer separaten
+E-Mail vor dem Mathetag. Wir teilen so zu, dass möglichst viele ihren Erstwunsch
+bekommen.
+
+Wir starten um 8:45 Uhr im Hörsaal II (1. OG) des Instituts für Geo- und
+Umweltnaturwissenschaften in der Albertstraße 23b (https://www.openstreetmap.org/?mlat=48.002320&mlon=7.847924#map=19/48.002320/7.847924). Eine
+Wegbeschreibung findest du auf unserer Webseite (https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/).
+
+Falls du doch nicht teilnehmen kannst, schreib uns bitte kurz an
+didaktik@math.uni-freiburg.de, damit dein Platz an jemand anderen gehen
+kann.
+
+Viele Grüße,
+Dein Mathetag-Team
+
+Du erhältst diese Mail, weil du dich für den Mathetag des
+Mathematischen Instituts (https://uni-freiburg.de/mathematik-didaktik/mathematik-tag/) angemeldet hast. Bei Fragen schreibe bitte direkt
+an uns.
 
 Universität Freiburg
 Abteilung Didaktik der Mathematik

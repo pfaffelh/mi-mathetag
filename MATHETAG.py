@@ -13,6 +13,28 @@ from email.header import decode_header, make_header
 
 st.set_page_config(page_title="Mathetag Einteilung", layout="wide")
 
+def wunsch_spalte(df, spec):
+    """Liest einen Wunsch aus dem REDCap-Export.
+
+    spec ist entweder ein Spaltenname, ein Spaltenindex, oder ein Tupel
+    (Muster, Steuerspalte). Das Tupel steht fuer einen Wunsch, den REDCap per
+    Branching Logic auf mehrere Spalten verteilt: Beim Zweitwunsch gibt es pro
+    moeglichem Erstwunsch ein eigenes Dropdown (zweitwunschvm_ws1 ...), damit
+    der Erstwunsch dort nicht mehr zur Auswahl steht. Gelesen wird gezielt die
+    Spalte, die zum Erstwunsch passt - nicht einfach die erste gefuellte. So
+    stoeren alte Werte nicht, falls das Projekt ausgeblendete Felder nicht leert.
+    """
+    if isinstance(spec, tuple):
+        muster, steuer = spec
+        werte = []
+        for _, row in df.iterrows():
+            spalte = muster.format(str(row[steuer]).strip())
+            wert = row[spalte] if spalte in df.columns else ""
+            werte.append("" if pd.isna(wert) else str(wert).strip())
+        return werte
+    return list(df[spec] if isinstance(spec, str) else df[df.columns[spec]])
+
+
 def make_mails(df, smtp_user):
     messages = []
     for index, row in df.iterrows():
@@ -163,8 +185,8 @@ if anmeldungen_xls:
                 st.write(f"Einteilung in {wr['name']} möglich, es gibt genug Plätze.")
 
             # Diese Liste von Listen gibt die Wünsche der Teilnehmer 
-            # wunschspalten: Spaltennamen (z.B. REDCap) oder Spaltennummern
-            wuensche = [list(df[i] if isinstance(i, str) else df[df.columns[i]]) for i in wr["wunschspalten"]]            
+            # wunschspalten: siehe wunsch_spalte() bzw. edition_2026/config.py
+            wuensche = [wunsch_spalte(df, i) for i in wr["wunschspalten"]]
             allewuensche = [item for sublist in wuensche for item in sublist]
             # Wünsche müssen mit den Namen der Workshops übereinstimmen!
             w_namen = [w["name_kurz"] for w in wr["data"]]
